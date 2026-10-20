@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة زياد عشماوي لإدارة ورفع المشاريع</title>
+    <!-- تضمين مكتبة Tailwind CSS للتصميم الاحترافي -->
+    <script src="https://jsdelivr.net"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans">
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- القائمة الجانبية (Sidebar) -->
+        <div class="w-64 bg-indigo-900 text-white flex flex-col p-5 space-y-6">
+            <div class="text-2xl font-bold border-b border-indigo-700 pb-4 tracking-wide text-center">
+                منصة زياد عشماوي
+            </div>
+            <nav class="flex-1 space-y-3">
+                <a href="#" class="block py-2.5 px-4 rounded bg-indigo-700 font-medium">لوحة التحكم</a>
+                <a href="#" class="block py-2.5 px-4 rounded hover:bg-indigo-800 transition">المشاريع المرفوعة</a>
+                <a href="#" class="block py-2.5 px-4 rounded hover:bg-indigo-800 transition">الأرباح والمحفظة</a>
+            </nav>
+            <div class="text-sm text-indigo-300 text-center">© 2026 زياد عشماوي</div>
+        </div>
+
+        <!-- المحتوى الرئيسي (Main Content) -->
+        <div class="flex-1 flex flex-col overflow-y-auto">
+            
+            <!-- الشريط العلوي -->
+            <header class="bg-white shadow px-6 py-4 flex justify-between items-center">
+                <h1 class="text-xl font-semibold text-gray-700">بوابة رفع وإدارة المشاريع 🚀</h1>
+                <span class="text-sm bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full font-medium">حساب المشرف: زياد</span>
+            </header>
+
+            <!-- ساحة العمل -->
+            <main class="p-6 space-y-6">
+                
+                <!-- شبكة تحتوي على نموذج الرفع وقائمة المشاريع -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <!-- قسم نموذج رفع مشروع جديد (Form) -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm lg:col-span-1 border border-gray-200">
+                        <h2 class="text-lg font-bold mb-4 text-indigo-900 border-b pb-2">➕ رفع مشروع جديد</h2>
+                        
+                        <form id="projectForm" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">اسم المشروع</label>
+                                <input type="text" id="projectTitle" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="مثال: تطبيق متجر إلكتروني">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">وصف المشروع</label>
+                                <textarea id="projectDesc" required rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="اكتب تفاصيل المشروع ومميزاته..."></textarea>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">سعر المشروع (بالدولار)</label>
+                                <input type="number" id="projectPrice" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="مثال: 150">
+                            </div>
+
+                            <button type="submit" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg font-medium hover:bg-indigo-700 transition shadow-md">
+                                نشر المشروع في المنصة
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- قسم عرض المشاريع المرفوعة -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm lg:col-span-2 border border-gray-200">
+                        <div class="flex justify-between items-center mb-4 border-b pb-2">
+                            <h2 class="text-lg font-bold text-gray-800">📂 معرض المشاريع الحالية (<span id="projectCount">0</span>)</h2>
+                            <button onclick="clearProjects()" class="text-xs text-red-500 hover:underline">حذف جميع المشاريع</button>
+                        </div>
+                        
+                        <!-- هذا العنصر سيتم ملؤه بالمشاريع عبر الجافاسكريبت -->
+                        <div id="projectsContainer" class="space-y-4 max-h-[500px] overflow-y-auto pr-1">
+                            <!-- رسالة تظهر في حال عدم وجود مشاريع -->
+                            <p id="noProjectsContainer" class="text-gray-400 text-center py-8">لا توجد مشاريع مرفوعة حالياً. ابدأ برفع أول مشروع الآن!</p>
+                        </div>
+                    </div>
+
+                </div>
+
+            </main>
+        </div>
+
+    </div>
+
+    <!-- برمجة تشغيل النظام وتفاعله (JavaScript) -->
+    <script>
+        // دالة لجلب المشاريع المخزنة عند فتح الموقع
+        document.addEventListener('DOMContentLoaded', loadProjects);
+
+        // التعامل مع نموذج الرفع عند الضغط على زر النشر
+        document.getElementById('projectForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // منع الصفحة من إعادة التحميل
+
+            // جلب القيم المدخلة
+            const title = document.getElementById('projectTitle').value;
+            const desc = document.getElementById('projectDesc').value;
+            const price = document.getElementById('projectPrice').value;
+            const date = new Date().toLocaleDateString('ar-EG');
+
+            // إنشاء كائن المشروع الجديد
+            const newProject = { title, desc, price, date };
+
+            // جلب المشاريع السابقة وإضافة الجديد لها
+            let projects = JSON.parse(localStorage.getItem('projects')) || [];
+            projects.push(newProject);
+
+            // حفظ القائمة الجديدة في ذاكرة المتصفح
+            localStorage.setItem('projects', JSON.stringify(projects));
+
+            // إعادة تعيين الحقول وإعادة عرض المشاريع
+            document.getElementById('projectForm').reset();
+            loadProjects();
+        });
+
+        // دالة لعرض المشاريع في الواجهة
+        function loadProjects() {
+            const container = document.getElementById('projectsContainer');
+            const noProjects = document.getElementById('noProjectsContainer');
+            const countSpan = document.getElementById('projectCount');
+            
+            let projects = JSON.parse(localStorage.getItem('projects')) || [];
+            
+            // تحديث عداد المشاريع
+            countSpan.innerText = projects.length;
+
+            // تنظيف الحاوية مع الإبقاء على رسالة التنبيه إن لم يكن هناك مشاريع
+            container.innerHTML = '';
+            
+            if (projects.length === 0) {
+                container.appendChild(noProjects);
+                noProjects.classList.remove('hidden');
+                return;
+            }
+
+            // إخفاء رسالة "لا توجد مشاريع"
+            if(noProjects) noProjects.classList.add('hidden');
+
+            // بناء كروت المشاريع عكسياً (الأحدث يظهر أولاً)
+            projects.reverse().forEach(project => {
+                const projectCard = document.createElement('div');
+                projectCard.className = "p-5 border border-gray-100 rounded-xl bg-gray-50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:shadow-sm transition";
+                
+                projectCard.innerHTML = `
+                    <div class="space-y-1 flex-1">
+                        <h4 class="font-bold text-gray-900 text-lg">${project.title}</h4>
+                        <p class="text-sm text-gray-600 leading-relaxed">${project.desc}</p>
+                        <p class="text-xs text-gray-400 mt-2">تاريخ النشر: ${project.date}</p>
+                    </div>
+                    <div class="flex flex-col items-end justify-between h-full min-w-[100px]">
+                        <span class="text-lg font-black text-green-600">$${project.price}</span>
+                        <span class="mt-2 text-xs bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded font-medium border border-indigo-100">نشط ومعروض</span>
+                    </div>
+                `;
+                container.appendChild(projectCard);
+            });
+        }
+
+        // دالة لحذف كل المشاريع وتصفير القائمة
+        function clearProjects() {
+            if (confirm('هل أنت متأكد من حذف كافة المشاريع؟')) {
+                localStorage.removeItem('projects');
+                loadProjects();
+            }
+        }
+    </script>
+</body>
+</html>
